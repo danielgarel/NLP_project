@@ -6,6 +6,14 @@ import scipy.sparse as sp
 import sys
 from tqdm import tqdm
 
+"""Possible library for initial dependency parsing
+from allennlp.predictors.predictor import Predictor
+import allennlp_models.structured_prediction
+predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/biaffine-dependency-parser-ptb-2020.04.06.tar.gz")
+predictor.predict(
+  sentence="If I bring 10 dollars tomorrow, can you buy me lunch?"
+)"""
+
 
 if len(sys.argv) < 2:
 	sys.exit("Use: python build_graph.py <dataset>")
@@ -151,7 +159,7 @@ def build_graph(start, end):
         doc_word_id_map = {}
         for j in range(doc_nodes):
             doc_word_id_map[doc_vocab[j]] = j
-
+        #TODO: Change the sliding window here below
         # sliding windows
         windows = []
         if doc_len <= window_size:
