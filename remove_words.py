@@ -15,7 +15,7 @@ else:
 try:
     least_freq = sys.argv[2]
 except:
-    least_freq = 5
+    least_freq = 0
     print('using default least word frequency = 5')
 
 
@@ -25,9 +25,9 @@ print(stop_words)
 
 
 doc_content_list = []
-with open('data/corpus/' + dataset + '.txt', 'rb') as f:
+with open('data\\corpus\\' + dataset + '.txt', 'rb') as f:
     for line in f.readlines():
-        doc_content_list.append(line.strip().decode('latin1'))
+        doc_content_list.append(line.strip().decode('utf-8'))
 
 
 word_freq = {}  # to remove rare words
@@ -57,18 +57,20 @@ for doc_content in doc_content_list:
 
 
 clean_corpus_str = '\n'.join(clean_docs)
-with open('data/corpus/' + dataset + '.clean.txt', 'w') as f:
+with open('data\\corpus\\' + dataset + '.clean.txt', 'w') as f:
     f.write(clean_corpus_str)
 
 
-len_list = []
-with open('data/corpus/' + dataset + '.clean.txt', 'r') as f:
-    for line in f.readlines():
-        if line == '\n':
-            continue
-        temp = line.strip().split()
-        len_list.append(len(temp))
-
-print('min_len : ' + str(min(len_list)))
-print('max_len : ' + str(max(len_list)))
-print('average_len : ' + str(sum(len_list)/len(len_list)))
+# len_list = []
+# empty_ind = []
+# with open('data/corpus/' + dataset + '.clean.txt', 'r') as f:
+#     for i,line in enumerate(f.readlines()):
+#         if line == '\n':
+#            empty_ind.append(i)
+#         continue
+#         temp = line.strip().split()
+#         len_list.append(len(temp))
+# print(empty_ind)
+# print('min_len : ' + str(min(len_list)))
+# print('max_len : ' + str(max(len_list)))
+# print('average_len : ' + str(sum(len_list)/len(len_list)))
