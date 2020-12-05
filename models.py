@@ -1,7 +1,7 @@
 from layers import *
 from metrics import *
 
-flags = tf.app.flags
+flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 
 

@@ -2,7 +2,9 @@ from __future__ import division
 from __future__ import print_function
 
 import time
-import tensorflow as tf
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from sklearn import metrics
 import pickle as pkl
 
@@ -15,7 +17,7 @@ from models import GNN, MLP
 # tf.set_random_seed(seed)
 
 # Settings
-flags = tf.app.flags
+flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_string('dataset', 'mr', 'Dataset string.')  # 'mr','ohsumed','R8','R52'
 flags.DEFINE_string('model', 'gnn', 'Model string.') 

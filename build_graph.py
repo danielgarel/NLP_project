@@ -19,7 +19,7 @@ if len(sys.argv) < 2:
 	sys.exit("Use: python build_graph.py <dataset>")
 
 # settings
-datasets = ['mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
+datasets = ['question1', 'question2','mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
 
 dataset = sys.argv[1]
 if dataset not in datasets:
@@ -58,14 +58,14 @@ doc_name_list = []
 doc_train_list = []
 doc_test_list = []
 
-with open('data/' + dataset + '.txt', 'r') as f:
+with open('data/' + 'quora_split' + '.txt', 'r') as f:
     for line in f.readlines():
         doc_name_list.append(line.strip())
         temp = line.split("\t")
 
-        if temp[1].find('test') != -1:
+        if temp[2].find('test') != -1:
             doc_test_list.append(line.strip())
-        elif temp[1].find('train') != -1:
+        elif temp[2].find('train') != -1:
             doc_train_list.append(line.strip())
 
 
@@ -91,7 +91,7 @@ for test_name in doc_test_list:
 random.shuffle(test_ids)
 
 ids = train_ids + test_ids
-
+print(len(ids))
 
 shuffle_doc_name_list = []
 shuffle_doc_words_list = []
@@ -125,7 +125,7 @@ for v in vocab:
 label_set = set()
 for doc_meta in shuffle_doc_name_list:
     temp = doc_meta.split('\t')
-    label_set.add(temp[2])
+    label_set.add(temp[1])
 label_list = list(label_set)
 
 
@@ -215,7 +215,7 @@ def build_graph(start, end):
     for i in range(start, end):
         doc_meta = shuffle_doc_name_list[i]
         temp = doc_meta.split('\t')
-        label = temp[2]
+        label = temp[1]
         one_hot = [0 for l in range(len(label_list))]
         label_index = label_list.index(label)
         one_hot[label_index] = 1
