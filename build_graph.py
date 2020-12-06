@@ -7,11 +7,20 @@ import sys
 from tqdm import tqdm
 
 
+"""Possible library for initial dependency parsing
+from allennlp.predictors.predictor import Predictor
+import allennlp_models.structured_prediction
+predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/biaffine-dependency-parser-ptb-2020.04.06.tar.gz")
+predictor.predict(
+  sentence="If I bring 10 dollars tomorrow, can you buy me lunch?"
+)"""
+
+
 if len(sys.argv) < 2:
 	sys.exit("Use: python build_graph.py <dataset>")
 
 # settings
-datasets = ['mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
+datasets = ['question1', 'question2', 'mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
 
 dataset = sys.argv[1]
 if dataset not in datasets:
@@ -50,7 +59,7 @@ doc_name_list = []
 doc_train_list = []
 doc_test_list = []
 
-with open('data/' + dataset + '.txt', 'r') as f:
+with open('data/' + 'quora_split' + '.txt', 'r') as f:
     for line in f.readlines():
         doc_name_list.append(line.strip())
         temp = line.split("\t")
@@ -152,6 +161,7 @@ def build_graph(start, end):
         for j in range(doc_nodes):
             doc_word_id_map[doc_vocab[j]] = j
 
+        #TODO: Change the sliding window here below
         # sliding windows
         windows = []
         if doc_len <= window_size:

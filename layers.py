@@ -281,3 +281,47 @@ class ReadoutLayer(Layer):
 
         return output
 
+
+class ReadoutLayer_(Layer):
+    """Graph Readout Layer."""
+    def __init__(self, input_dim, placeholders, dropout=0.,
+                 sparse_inputs=False, act=tf.nn.relu, bias=False, **kwargs):
+        super(ReadoutLayer, self).__init__(**kwargs)
+
+        if dropout:
+            self.dropout = placeholders['dropout']
+        else:
+            self.dropout = 0.
+        
+        self.act = act
+        self.sparse_inputs = sparse_inputs
+        self.bias = bias
+        self.mask = placeholders['mask']
+
+        with tf.variable_scope(self.name + '_vars'):
+            self.vars['weights_att'] = glorot([input_dim, 1], name='weights_att')
+            self.vars['weights_emb'] = glorot([input_dim, input_dim], name='weights_emb')
+
+            self.vars['bias_att'] = zeros([1], name='bias_att')
+            self.vars['bias_emb'] = zeros([input_dim], name='bias_emb')
+
+        if self.logging:
+            self._log_vars()
+
+    def _call(self, inputs):
+        x = inputs
+
+        # soft attention
+        att = tf.sigmoid(dot(x, self.vars['weights_att']) + self.vars['bias_att'])
+        emb = self.act(dot(x, self.vars['weights_emb']) + self.vars['bias_emb'])
+
+        N = tf.reduce_sum(self.mask, axis=1)
+        M = (self.mask-1) * 1e9
+        
+        # graph summation
+        g = self.mask * att * emb
+        g = tf.reduce_sum(g, axis=1) / N + tf.reduce_max(g + M, axis=1)
+        g = tf.nn.dropout(g, 1-self.dropout)      
+
+        return g
+
