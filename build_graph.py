@@ -15,6 +15,7 @@ predictor.predict(
   sentence="If I bring 10 dollars tomorrow, can you buy me lunch?"
 )"""
 
+random_SEED = 11
 
 if len(sys.argv) < 2:
 	sys.exit("Use: python build_graph.py <dataset>")
@@ -84,13 +85,13 @@ train_ids = []
 for train_name in doc_train_list:
     train_id = doc_name_list.index(train_name)
     train_ids.append(train_id)
-random.shuffle(train_ids)
+random.Random(random_SEED).(train_ids)
 
 test_ids = []
 for test_name in doc_test_list:
     test_id = doc_name_list.index(test_name)
     test_ids.append(test_id)
-random.shuffle(test_ids)
+random.Random(random_SEED).(test_ids)
 
 ids = train_ids + test_ids
 print(len(ids))
