@@ -188,7 +188,7 @@ class GNN(Model):
 
 class GNN_sim(Model):
     def __init__(self, placeholders, input_dim, **kwargs):
-        super(GNN, self).__init__(**kwargs)
+        super(GNN_sim, self).__init__(**kwargs)
 
         self.inputs = placeholders['features']
         self.input_dim = input_dim

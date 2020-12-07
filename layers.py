@@ -288,7 +288,7 @@ class ReadoutLayer_(Layer):
     """Graph Readout Layer."""
     def __init__(self, input_dim, placeholders, dropout=0.,
                  sparse_inputs=False, act=tf.nn.relu, bias=False, **kwargs):
-        super(ReadoutLayer, self).__init__(**kwargs)
+        super(ReadoutLayer_, self).__init__(**kwargs)
 
         if dropout:
             self.dropout = placeholders['dropout']

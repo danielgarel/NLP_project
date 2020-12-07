@@ -19,7 +19,7 @@ from models import GNN, MLP
 # Settings
 flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_string('dataset', 'mr', 'Dataset string.')  # 'mr','ohsumed','R8','R52'
+#flags.DEFINE_string('dataset', 'mr', 'Dataset string.')  # 'mr','ohsumed','R8','R52'
 flags.DEFINE_string('model', 'gnn', 'Model string.') 
 flags.DEFINE_float('learning_rate', 0.005, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 200, 'Number of epochs to train.')
@@ -33,20 +33,39 @@ flags.DEFINE_integer('early_stopping', -1, 'Tolerance for early stopping (# of e
 flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.') # Not used
 
 # Load data
-train_adj, train_feature, train_y, val_adj, val_feature, val_y, test_adj, test_feature, test_y = load_data(FLAGS.dataset)
+train_adj1, train_feature1, train_y1, val_adj1, val_feature1, val_y1, test_adj1, test_feature1, test_y1 = load_data('question1')
+train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2, test_feature2, test_y2 = load_data('question2')
 
+# concat_ratio = FLAGS.batch_size/2
+# def concat_(train_test_y, half_batch =concat_ratio, input1, input2):
+#     indices = np.arange(0, len(train_test_y))
+#     for start in range(0, len(train_test_y), half_batch):
+#         end = start + half_batch
+#         idx = indices[start:end]
+#         output = np.concatenate(input1[idx], input2[idx])
+#     return output
+# train_adj = concat_(train_test_y = train_y1, half_batch = concat_ratio, input1 = train_adj1, input2 = train_adj2)
+# train_feature = concat_(train_test_y = train_y1, half_batch = concat_ratio, input1 = train_feature1, input2 = train_feature2)
+# val_adj = concat_(train_test_y = val_adj1, half_batch = concat_ratio, input1 = val_adj1, input2 = val_adj2)
+# val_feature = concat_(train_test_y = val_adj1, half_batch = concat_ratio, input1 = val_feature1, input2 = val_feature2)
+# test_adj = concat_(train_test_y = val_adj1, half_batch = concat_ratio, input1 = val_feature1, input2 = val_feature2)
 
 # Some preprocessing
 print('loading training set')
-train_adj, train_mask = preprocess_adj(train_adj)
-train_feature = preprocess_features(train_feature)
+train_adj1, train_mask1 = preprocess_adj(train_adj1)
+train_feature1 = preprocess_features(train_feature1)
+train_adj2, train_mask2 = preprocess_adj(train_adj2)
+train_feature2 = preprocess_features(train_feature2)
 print('loading validation set')
-val_adj, val_mask = preprocess_adj(val_adj)
-val_feature = preprocess_features(val_feature)
+val_adj1, val_mask1 = preprocess_adj(val_adj1)
+val_feature1 = preprocess_features(val_feature1)
+val_adj2, val_mask2 = preprocess_adj(val_adj2)
+val_feature2 = preprocess_features(val_feature2)
 print('loading test set')
-test_adj, test_mask = preprocess_adj(test_adj)
-test_feature = preprocess_features(test_feature)
-
+test_adj1, test_mask1 = preprocess_adj(test_adj1)
+test_feature1 = preprocess_features(test_feature1)
+test_adj2, test_mask2 = preprocess_adj(test_adj2)
+test_feature2 = preprocess_features(test_feature2)
 
 if FLAGS.model == 'gnn':
     # support = [preprocess_adj(adj)]
@@ -116,14 +135,26 @@ for epoch in range(FLAGS.epochs):
     t = time.time()
         
     # Training step
-    indices = np.arange(0, len(train_y))
+    indices = np.arange(0, len(train_y1)) #TODO confirm that len(train_y1 = train_y2 = train_y)
     np.random.shuffle(indices)
     
     train_loss, train_acc = 0, 0
-    for start in range(0, len(train_y), FLAGS.batch_size):
+    for start in range(0, len(train_y1), FLAGS.batch_size):
         end = start + FLAGS.batch_size
         idx = indices[start:end]
         # Construct feed dictionary
+        concat_ratio = FLAGS.batch_size/2
+        def concat_(train_test_y, half_batch =concat_ratio, input1, input2):
+            indices = np.arange(0, len(train_test_y))
+            for start in range(0, len(train_test_y), half_batch):
+                end = start + half_batch
+                idx = indices[start:end]
+                output = np.concatenate(input1[idx], input2[idx])
+            return output
+        train_feature = concat_(train_test_y = train_y1, half_batch =concat_ratio, input1 = train_feature1, input2 = train_feature2)
+        train_adj = concat_(train_test_y = train_y1, half_batch =concat_ratio, input1 = train_adj1, input2 = train_adj2)
+        train_mask = concat_(train_test_y=train_y1, half_batch=concat_ratio, input1=train_mask1, input2=train_mask2)
+        train_y =concat_(train_test_y=train_y1, half_batch=concat_ratio, input1=train_y1, input2=train_y2)
         feed_dict = construct_feed_dict(train_feature[idx], train_adj[idx], train_mask[idx], train_y[idx], placeholders)
         feed_dict.update({placeholders['dropout']: FLAGS.dropout})
 
