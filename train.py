@@ -9,7 +9,7 @@ from sklearn import metrics
 import pickle as pkl
 
 from utils import *
-from models import GNN, MLP
+from models import GNN, MLP, GNN_sim
 
 # Set random seed
 # seed = 123
@@ -20,7 +20,7 @@ from models import GNN, MLP
 flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 #flags.DEFINE_string('dataset', 'mr', 'Dataset string.')  # 'mr','ohsumed','R8','R52'
-flags.DEFINE_string('model', 'gnn', 'Model string.') 
+flags.DEFINE_string('model', 'gnn', 'Model string.','gnn_sim')
 flags.DEFINE_float('learning_rate', 0.005, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 200, 'Number of epochs to train.')
 flags.DEFINE_integer('batch_size', 4096, 'Size of batches per epoch.') 
@@ -67,14 +67,14 @@ test_feature1 = preprocess_features(test_feature1)
 test_adj2, test_mask2 = preprocess_adj(test_adj2)
 test_feature2 = preprocess_features(test_feature2)
 
-if FLAGS.model == 'gnn':
+if FLAGS.model == 'gnn': #TODO Can change if we want to make it more precise to have the gnn_sim only
     # support = [preprocess_adj(adj)]
     # num_supports = 1
-    model_func = GNN
+    model_func = GNN_sim
 elif FLAGS.model == 'gcn_cheby': # not used
     # support = chebyshev_polynomials(adj, FLAGS.max_degree)
     num_supports = 1 + FLAGS.max_degree
-    model_func = GNN
+    model_func = GNN_sim
 elif FLAGS.model == 'dense': # not used
     # support = [preprocess_adj(adj)]
     num_supports = 1
