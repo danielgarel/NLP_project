@@ -52,20 +52,29 @@ train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2,
 
 # Some preprocessing
 print('loading training set')
-train_adj1, train_mask1 = preprocess_adj(train_adj1)
-train_feature1 = preprocess_features(train_feature1)
-train_adj2, train_mask2 = preprocess_adj(train_adj2)
-train_feature2 = preprocess_features(train_feature2)
+m = max([a.shape[0] for a in train_adj1] ++ [a.shape[0] for a in train_adj2])
+train_adj1, train_mask1 = preprocess_adj(train_adj1, m)
+train_adj2, train_mask2 = preprocess_adj(train_adj2, m)
+
+m = max([len(f) for f in train_feature1] ++ [len(f) for f in train_feature2])
+train_feature1 = preprocess_features(train_feature1, m)
+train_feature2 = preprocess_features(train_feature2, m)
 print('loading validation set')
-val_adj1, val_mask1 = preprocess_adj(val_adj1)
-val_feature1 = preprocess_features(val_feature1)
-val_adj2, val_mask2 = preprocess_adj(val_adj2)
-val_feature2 = preprocess_features(val_feature2)
+m = max([a.shape[0] for a in val_adj1] ++ [a.shape[0] for a in val_adj2])
+val_adj1, val_mask1 = preprocess_adj(val_adj1, m)
+val_adj2, val_mask2 = preprocess_adj(val_adj2, m)
+
+m = max([len(f) for f in val_feature1] ++ [len(f) for f in val_feature2])
+val_feature1 = preprocess_features(val_feature1, m)
+val_feature2 = preprocess_features(val_feature2, m)
 print('loading test set')
-test_adj1, test_mask1 = preprocess_adj(test_adj1)
-test_feature1 = preprocess_features(test_feature1)
-test_adj2, test_mask2 = preprocess_adj(test_adj2)
-test_feature2 = preprocess_features(test_feature2)
+m = max([a.shape[0] for a in test_adj1] ++ [a.shape[0] for a in test_adj2])
+test_adj1, test_mask1 = preprocess_adj(test_adj1, m)
+test_adj2, test_mask2 = preprocess_adj(test_adj2, m)
+
+m = max([len(f) for f in test_feature1] ++ [len(f) for f in test_feature2])
+test_feature1 = preprocess_features(test_feature1, m)
+test_feature2 = preprocess_features(test_feature2, m)
 
 if FLAGS.model == 'gnn': #TODO Can change if we want to make it more precise to have the gnn_sim only
     # support = [preprocess_adj(adj)]
