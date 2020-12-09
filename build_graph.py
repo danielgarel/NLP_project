@@ -21,7 +21,7 @@ if len(sys.argv) < 2:
 	sys.exit("Use: python build_graph.py <dataset>")
 
 # settings
-datasets = ['question1', 'question2', 'mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
+datasets = ['question1', 'question1_subset',  'question2', 'question2_subset', 'mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
 
 
 dataset = sys.argv[1]
@@ -61,7 +61,7 @@ doc_name_list = []
 doc_train_list = []
 doc_test_list = []
 
-with open('data/' + 'quora_split' + '.txt', 'r') as f:
+with open('data/' + 'quora_split_subset' + '.txt', 'r') as f:
     for line in f.readlines():
         doc_name_list.append(line.strip())
         temp = line.split("\t")
@@ -85,13 +85,13 @@ train_ids = []
 for train_name in doc_train_list:
     train_id = doc_name_list.index(train_name)
     train_ids.append(train_id)
-random.Random(random_SEED).(train_ids)
+random.Random(random_SEED).shuffle(train_ids)
 
 test_ids = []
 for test_name in doc_test_list:
     test_id = doc_name_list.index(test_name)
     test_ids.append(test_id)
-random.Random(random_SEED).(test_ids)
+random.Random(random_SEED).shuffle(test_ids)
 
 ids = train_ids + test_ids
 print(len(ids))

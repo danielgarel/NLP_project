@@ -20,7 +20,7 @@ from models import GNN, MLP, GNN_sim
 flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 #flags.DEFINE_string('dataset', 'mr', 'Dataset string.')  # 'mr','ohsumed','R8','R52'
-flags.DEFINE_string('model', 'gnn', 'Model string.','gnn_sim')
+flags.DEFINE_string('model', 'gnn', 'Model string.')
 flags.DEFINE_float('learning_rate', 0.005, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 200, 'Number of epochs to train.')
 flags.DEFINE_integer('batch_size', 4096, 'Size of batches per epoch.') 
@@ -33,8 +33,8 @@ flags.DEFINE_integer('early_stopping', -1, 'Tolerance for early stopping (# of e
 flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.') # Not used
 
 # Load data
-train_adj1, train_feature1, train_y1, val_adj1, val_feature1, val_y1, test_adj1, test_feature1, test_y1 = load_data('question1')
-train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2, test_feature2, test_y2 = load_data('question2')
+train_adj1, train_feature1, train_y1, val_adj1, val_feature1, val_y1, test_adj1, test_feature1, test_y1 = load_data('question1_subset')
+train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2, test_feature2, test_y2 = load_data('question2_subset')
 
 # concat_ratio = FLAGS.batch_size/2
 # def concat_(train_test_y, half_batch =concat_ratio, input1, input2):
@@ -88,7 +88,7 @@ placeholders = {
     'support': tf.placeholder(tf.float32, shape=(None, None, None)),
     'features': tf.placeholder(tf.float32, shape=(None, None, FLAGS.input_dim)),
     'mask': tf.placeholder(tf.float32, shape=(None, None, 1)),
-    'labels': tf.placeholder(tf.float32, shape=(None, train_y.shape[1])),
+    'labels': tf.placeholder(tf.float32, shape=(None, train_y1.shape[1])),
     'dropout': tf.placeholder_with_default(0., shape=()),
     'num_features_nonzero': tf.placeholder(tf.int32)  # helper variable for sparse dropout
 }
@@ -144,18 +144,18 @@ for epoch in range(FLAGS.epochs):
         idx = indices[start:end]
         # Construct feed dictionary
         concat_ratio = FLAGS.batch_size/2
-        def concat_(train_test_y, half_batch =concat_ratio, input1, input2):
+        def concat_(train_test_y, concat_ratio, input1, input2):
             indices = np.arange(0, len(train_test_y))
             for start in range(0, len(train_test_y), half_batch):
                 end = start + half_batch
                 idx = indices[start:end]
                 output = np.concatenate(input1[idx], input2[idx])
             return output
-        train_feature = concat_(train_test_y = train_y1, half_batch =concat_ratio, input1 = train_feature1, input2 = train_feature2)
-        train_adj = concat_(train_test_y = train_y1, half_batch =concat_ratio, input1 = train_adj1, input2 = train_adj2)
-        train_mask = concat_(train_test_y=train_y1, half_batch=concat_ratio, input1=train_mask1, input2=train_mask2)
-        train_y =concat_(train_test_y=train_y1, half_batch=concat_ratio, input1=train_y1, input2=train_y2)
-        feed_dict = construct_feed_dict(train_feature[idx], train_adj[idx], train_mask[idx], train_y[idx], placeholders)
+        #train_feature = concat_(train_y1, concat_ratio, train_feature1, train_feature2)
+        #train_adj = concat_(train_y1, concat_ratio, train_adj1, train_adj2)
+        #train_mask = concat_(train_y1, concat_ratio, train_mask1, train_mask2)
+        #train_y =concat_(train_y1, concat_ratio, train_y1, train_y2)
+        feed_dict = construct_feed_dict(tf.concat([train_feature1[idx], train_feature2[idx]], 0), tf.concat([train_adj1[idx], train_adj2[idx]], 0), tf.concat([train_mask1[idx], train_mask2[idx]], 0), train_y[idx], placeholders)
         feed_dict.update({placeholders['dropout']: FLAGS.dropout})
 
         outs = sess.run([model.opt_op, model.loss, model.accuracy], feed_dict=feed_dict)
