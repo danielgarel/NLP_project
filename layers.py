@@ -51,6 +51,9 @@ def dot(x, y, sparse=False):
         res = tf.einsum('bij,jk->bik', x, y) # tf.matmul(x, y)
     return res
 
+def dot_(x, y, sparse=False):
+    res = tf.einsum('bj,jk->bk', x, y) # tf.matmul(x, y)
+    return res
 
 def gru_unit(support, x, var, act, mask, dropout, sparse_inputs=False):
     """GRU unit with 3D tensor inputs."""
@@ -161,6 +164,49 @@ class Dense(Layer):
 
         # transform
         output = dot(x, self.vars['weights'], sparse=self.sparse_inputs)
+
+        # bias
+        if self.bias:
+            output += self.vars['bias']
+
+        return self.act(output)
+
+class Dense_(Layer):
+    """Dense layer."""
+    def __init__(self, input_dim, output_dim, placeholders, dropout=0., sparse_inputs=False,
+                 act=tf.nn.relu, bias=False, featureless=False, **kwargs):
+        super(Dense_, self).__init__(**kwargs)
+
+        if dropout:
+            self.dropout = placeholders['dropout']
+        else:
+            self.dropout = 0.
+
+        self.act = act
+        self.sparse_inputs = sparse_inputs
+        self.featureless = featureless
+        self.bias = bias
+
+        # helper variable for sparse dropout
+        self.num_features_nonzero = placeholders['num_features_nonzero']
+
+        with tf.variable_scope(self.name + '_vars'):
+            self.vars['weights'] = glorot([input_dim, output_dim],
+                                          name='weights')
+            if self.bias:
+                self.vars['bias'] = zeros([output_dim], name='bias')
+
+        if self.logging:
+            self._log_vars()
+
+    def _call(self, inputs):
+        x = inputs
+
+        # dropout
+        x = tf.nn.dropout(x, 1-self.dropout)
+
+        # transform
+        output = dot_(x, self.vars['weights'])
 
         # bias
         if self.bias:

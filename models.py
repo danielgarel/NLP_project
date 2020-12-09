@@ -271,7 +271,7 @@ class GNN_sim(Model):
                                         dropout=True,
                                         logging=self.logging))
 
-        self.classifier = Dense(input_dim=2*FLAGS.hidden,
+        self.classifier = Dense_(input_dim=2*FLAGS.hidden,
                                  output_dim=self.output_dim,
                                  placeholders=self.placeholders,
                                  act=tf.nn.relu,
