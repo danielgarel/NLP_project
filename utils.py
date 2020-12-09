@@ -115,9 +115,9 @@ def coo_to_tuple(sparse_coo):
     return (sparse_coo.coords.T, sparse_coo.data, sparse_coo.shape)
 
 
-def preprocess_features(features):
+def preprocess_features(features, m):
     """Row-normalize feature matrix and convert to tuple representation"""
-    max_length = max([len(f) for f in features])
+    max_length = m
     
     for i in tqdm(range(features.shape[0])):
         feature = np.array(features[i])
@@ -138,9 +138,9 @@ def normalize_adj(adj):
     return adj.dot(d_mat_inv_sqrt).transpose().dot(d_mat_inv_sqrt)
 
 
-def preprocess_adj(adj):
+def preprocess_adj(adj, m):
     """Preprocessing of adjacency matrix for simple GCN model and conversion to tuple representation."""
-    max_length = max([a.shape[0] for a in adj])
+    max_length = m
     mask = np.zeros((adj.shape[0], max_length, 1)) # mask for padding
 
     for i in tqdm(range(adj.shape[0])):
