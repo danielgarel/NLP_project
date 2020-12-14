@@ -238,8 +238,10 @@ class GNN_sim(Model):
         # Create feature for classification
         sub = tf.math.subtract(questions1, questions2)
         mul = tf.math.multiply(questions1, questions2)
+        dot = tf.reduce_sum( mul, 1, keep_dims=True )
+        l2 = tf.reduce_sum(tf.multiply( sub, sub ), 1, keep_dims=True)
 
-        classification_features = tf.concat([sub, mul], 1)
+        classification_features = tf.concat([sub, mul, dot, l2], 1)
 
         self.outputs = self.classifier(classification_features)
 
@@ -271,7 +273,7 @@ class GNN_sim(Model):
                                         dropout=True,
                                         logging=self.logging))
 
-        self.classifier = Dense_(input_dim=2*FLAGS.hidden,
+        self.classifier = Dense_(input_dim=2*FLAGS.hidden + 2,
                                  output_dim=self.output_dim,
                                  placeholders=self.placeholders,
                                  act=tf.nn.relu,
