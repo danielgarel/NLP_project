@@ -199,7 +199,7 @@ class GNN_sim(Model):
         self.classifier = None
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
-
+        print(self.output_dim)
         print('build...')
         self.build()
 
@@ -213,7 +213,7 @@ class GNN_sim(Model):
                 self.loss += FLAGS.weight_decay * tf.nn.l2_loss(var)
 
         # Cross entropy error
-        self.loss += sigmoid_cross_entropy(self.outputs, self.placeholders['labels'])
+        self.loss += softmax_cross_entropy(self.outputs, self.placeholders['labels'])
 
     def _accuracy(self):
         self.accuracy = accuracy(self.outputs, self.placeholders['labels'])
@@ -280,4 +280,4 @@ class GNN_sim(Model):
                                  logging=self.logging)
         
     def predict(self):
-        return tf.nn.sigmoid(self.outputs)
+        return tf.nn.softmax(self.outputs)
