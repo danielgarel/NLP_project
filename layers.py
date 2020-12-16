@@ -212,7 +212,7 @@ class Dense_(Layer):
         if self.bias:
             output += self.vars['bias']
 
-        return self.act(output)
+        return output
 
 
 class GraphLayer(Layer):
