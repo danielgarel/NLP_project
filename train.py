@@ -33,8 +33,8 @@ flags.DEFINE_integer('early_stopping', -1, 'Tolerance for early stopping (# of e
 flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.') # Not used
 
 # Load data
-train_adj1, train_feature1, train_y1, val_adj1, val_feature1, val_y1, test_adj1, test_feature1, test_y1 = load_data('question1')
-train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2, test_feature2, test_y2 = load_data('question2')
+train_adj1, train_feature1, train_y1, val_adj1, val_feature1, val_y1, test_adj1, test_feature1, test_y1 = load_data('question1_sub_bal')
+train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2, test_feature2, test_y2 = load_data('question2_sub_bal')
 
 # concat_ratio = FLAGS.batch_size/2
 # def concat_(train_test_y, half_batch =concat_ratio, input1, input2):

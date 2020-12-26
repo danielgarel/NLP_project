@@ -21,7 +21,7 @@ if len(sys.argv) < 2:
 	sys.exit("Use: python build_graph.py <dataset>")
 
 # settings
-datasets = ['question1', 'question1_subset',  'question2', 'question2_subset', 'mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
+datasets = ['question1', 'question1_subset', 'question1_sub_bal',  'question2', 'question2_subset', 'question2_sub_bal', 'mr', 'ohsumed', 'R8', 'R52', 'TREC', 'ag_news', 'WebKB', 'SST1', 'SST2']
 
 
 dataset = sys.argv[1]
@@ -61,7 +61,7 @@ doc_name_list = []
 doc_train_list = []
 doc_test_list = []
 
-with open('data/' + 'quora_split_subset' + '.txt', 'r') as f:
+with open('data/' + 'quora_split_balanced_subset' + '.txt', 'r') as f:
     for line in f.readlines():
         doc_name_list.append(line.strip())
         temp = line.split("\t")
@@ -134,7 +134,7 @@ label_list = list(label_set)
 
 # select 90% training set
 train_size = len(train_ids)
-val_size = int(0.1 * train_size)
+val_size = 10000#int(0.1 * train_size)
 real_train_size = train_size - val_size
 test_size = len(test_ids)
 

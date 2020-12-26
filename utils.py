@@ -46,7 +46,7 @@ def load_data(dataset_str):
     for i in range(len(names)):
         with open("data/ind.{}.{}".format(dataset_str, names[i]), 'rb') as f:
             if sys.version_info > (3, 0):
-                objects.append(pkl.load(f, encoding='latin1')) #may need to change to utf8
+                objects.append(pkl.load(f, encoding='utf8')) #may need to change to utf8
             else:
                 objects.append(pkl.load(f))
 
