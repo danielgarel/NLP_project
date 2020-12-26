@@ -58,7 +58,7 @@ def dot_(x, y, sparse=False):
 def gru_unit(support, x, var, act, mask, dropout, sparse_inputs=False):
     """GRU unit with 3D tensor inputs."""
     # message passing
-    support = tf.nn.dropout(support, dropout) # optional
+    #support = tf.nn.dropout(support, dropout) # optional
     a = tf.matmul(support, x)
 
     # update gate        
@@ -368,15 +368,15 @@ class ReadoutLayer_(Layer):
         x = inputs
 
         # soft attention
-        att = tf.sigmoid(dot(x, self.vars['weights_att']) + self.vars['bias_att'])
+        #att = tf.sigmoid(dot(x, self.vars['weights_att']) + self.vars['bias_att'])
         emb = self.act(dot(x, self.vars['weights_emb']) + self.vars['bias_emb'])
 
         N = tf.reduce_sum(self.mask, axis=1)
         M = (self.mask-1) * 1e9
         
         # graph summation
-        g = self.mask * att * emb
-        g = tf.reduce_sum(g, axis=1) / N + tf.reduce_max(g + M, axis=1)
+        g = self.mask * emb#* att * emb
+        g = tf.reduce_sum(g, axis=1) / N #+ tf.reduce_max(g + M, axis=1)
         g = tf.nn.dropout(g, 1-self.dropout)      
 
         return g
