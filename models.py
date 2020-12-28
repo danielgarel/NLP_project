@@ -283,3 +283,101 @@ class GNN_sim(Model):
         
     def predict(self):
         return tf.nn.softmax(self.outputs)
+
+class DNN_sim(Model):
+    def __init__(self, placeholders, input_dim, **kwargs):
+        super(GNN_sim, self).__init__(**kwargs)
+
+        self.inputs = placeholders['features']
+        self.input_dim = input_dim
+        # self.input_dim = self.inputs.get_shape().as_list()[1]  # To be supported in future Tensorflow versions
+        self.output_dim = placeholders['labels'].get_shape().as_list()[1]
+        self.mask = placeholders['mask']
+        self.placeholders = placeholders
+        self.classifier = None
+
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
+        print(self.output_dim)
+        print('build...')
+        self.build()
+
+    def _loss(self):
+        # Weight decay loss
+        # for var in self.layers[0].vars.values():
+        #     self.loss += FLAGS.weight_decay * tf.nn.l2_loss(var)
+
+        for var in tf.trainable_variables():
+            if 'weights' in var.name or 'bias' in var.name:
+                self.loss += FLAGS.weight_decay * tf.nn.l2_loss(var)
+
+        # Cross entropy error
+        self.loss += softmax_cross_entropy(self.outputs, self.placeholders['labels'])
+
+    def _accuracy(self):
+        self.accuracy = accuracy(self.outputs, self.placeholders['labels'])
+        self.preds = tf.argmax(self.outputs, 1)
+        self.labels = tf.argmax(self.placeholders['labels'], 1)
+
+    def build(self):
+        """ Wrapper for _build() """
+        with tf.variable_scope(self.name):
+            self._build()
+
+        # Latent representation of questions
+        self.activations = [self.inputs]
+        for layer in self.layers:
+            hidden = layer(self.activations[-1])
+            self.activations.append(hidden)
+        self.embeddings = self.activations[-1]
+        
+        # Recreate pairs
+        questions1, questions2 = tf.split(self.embeddings, num_or_size_splits=2, axis=0)
+
+        # Create feature for classification
+        sub = tf.math.abs(tf.math.subtract(questions1, questions2))
+        mul = tf.math.multiply(questions1, questions2)
+        #dot = tf.reduce_sum( mul, 1, keep_dims=True )
+        #l2 = tf.reduce_sum(tf.multiply( sub, sub ), 1, keep_dims=True)
+
+        classification_features = tf.concat([sub, mul], 1)
+
+        self.outputs = self.classifier(classification_features)
+
+        # Store model variables for easy access
+        variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
+        self.vars = {var.name: var for var in variables}
+
+        # Build metrics
+        self._loss()
+        self._accuracy()
+
+        self.opt_op = self.optimizer.minimize(self.loss)
+
+    def _build(self):
+        
+        self.layers.append(Dense(input_dim=self.input_dim,
+                                      output_dim=FLAGS.hidden,
+                                      placeholders=self.placeholders,
+                                      act=tf.tanh,
+                                      sparse_inputs=False,
+                                      dropout=True,
+                                      logging=self.logging))
+
+        self.layers.append(ReadoutLayer_(input_dim=FLAGS.hidden,
+                                        placeholders=self.placeholders,
+                                        act=tf.tanh,
+                                        sparse_inputs=False,
+                                        dropout=True,
+                                        logging=self.logging))
+
+        self.classifier = Dense_(input_dim=2*FLAGS.hidden,
+                                 output_dim=self.output_dim,
+                                 placeholders=self.placeholders,
+                                 act=None,
+                                 dropout=False,
+                                 sparse_inputs=False,
+                                 logging=self.logging)
+        
+    def predict(self):
+        return tf.nn.softmax(self.outputs)
+
