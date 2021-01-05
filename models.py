@@ -224,13 +224,13 @@ class GNN_sim(Model):
         """ Wrapper for _build() """
         with tf.variable_scope(self.name):
             self._build()
-
         # Latent representation of questions
         self.activations = [self.inputs]
         for layer in self.layers:
             hidden = layer(self.activations[-1])
             self.activations.append(hidden)
         self.embeddings = self.activations[-1]
+        print(self.embeddings)
         
         # Recreate pairs
         questions1, questions2 = tf.split(self.embeddings, num_or_size_splits=2, axis=0)
@@ -242,6 +242,7 @@ class GNN_sim(Model):
         #l2 = tf.reduce_sum(tf.multiply( sub, sub ), 1, keep_dims=True)
 
         classification_features = tf.concat([sub, mul], 1)
+        print(classification_features)
 
         self.outputs = self.classifier(classification_features)
 

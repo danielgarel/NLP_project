@@ -87,7 +87,7 @@ test_feature2 = preprocess_features(test_feature2, m)
 if FLAGS.model == 'gnn': #TODO Can change if we want to make it more precise to have the gnn_sim only
     # support = [preprocess_adj(adj)]
     # num_supports = 1
-    model_func = DNN_sim
+    model_func = GNN_sim
 elif FLAGS.model == 'gcn_cheby': # not used
     # support = chebyshev_polynomials(adj, FLAGS.max_degree)
     num_supports = 1 + FLAGS.max_degree
@@ -156,7 +156,7 @@ for epoch in range(FLAGS.epochs):
     np.random.shuffle(indices)
     
     train_loss, train_acc = 0, 0
-    for start in range(0, len(train_y1), FLAGS.batch_size):
+    for start in range(0, 1, FLAGS.batch_size):
         end = start + FLAGS.batch_size
         idx = indices[start:end]
         # Construct feed dictionary
@@ -174,6 +174,7 @@ for epoch in range(FLAGS.epochs):
         #train_y =concat_(train_y1, concat_ratio, train_y1, train_y2)
         feed_dict = construct_feed_dict(np.concatenate((train_feature1[idx], train_feature2[idx]), axis=0), np.concatenate((train_adj1[idx], train_adj2[idx]), axis=0), np.concatenate((train_mask1[idx], train_mask2[idx]), axis=0), train_y1[idx], placeholders)
         feed_dict.update({placeholders['dropout']: FLAGS.dropout})
+        print(feed_dict)
 
         outs = sess.run([model.opt_op, model.loss, model.accuracy], feed_dict=feed_dict)
         train_loss += outs[1]*len(idx)
