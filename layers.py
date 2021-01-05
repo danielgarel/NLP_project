@@ -191,12 +191,12 @@ class Dense_(Layer):
         self.num_features_nonzero = placeholders['num_features_nonzero']
 
         with tf.variable_scope(self.name + '_vars'):
-            self.vars['weights1'] = glorot([input_dim, 600],
+            self.vars['weights1'] = glorot([input_dim, 50],
                                           name='weights1')
-            self.vars['weights2'] = glorot([600, output_dim],
+            self.vars['weights2'] = glorot([50, output_dim],
                                           name='weights2')
             if self.bias:
-                self.vars['bias1'] = zeros([600], name='bias1')
+                self.vars['bias1'] = zeros([50], name='bias1')
                 self.vars['bias2'] = zeros([output_dim], name='bias2')
 
         if self.logging:

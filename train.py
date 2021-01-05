@@ -9,7 +9,7 @@ from sklearn import metrics
 import pickle as pkl
 
 from utils import *
-from models import GNN, MLP, GNN_sim
+from models import GNN, MLP, GNN_sim, DNN_sim
 
 # Set random seed
 # seed = 123
@@ -87,7 +87,7 @@ test_feature2 = preprocess_features(test_feature2, m)
 if FLAGS.model == 'gnn': #TODO Can change if we want to make it more precise to have the gnn_sim only
     # support = [preprocess_adj(adj)]
     # num_supports = 1
-    model_func = GNN_sim
+    model_func = DNN_sim
 elif FLAGS.model == 'gcn_cheby': # not used
     # support = chebyshev_polynomials(adj, FLAGS.max_degree)
     num_supports = 1 + FLAGS.max_degree
