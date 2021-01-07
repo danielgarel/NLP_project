@@ -1,4 +1,6 @@
 import tensorflow as tf
+import random
+import sklearn
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import *
 from tensorflow.keras.models import Model
@@ -13,8 +15,11 @@ MAX_TRUNC_LEN = 350
 '''Load the clean datasets'''
 question1 = pd.read_csv('C:\\Users\\danie\\PycharmProjects\\NLP_project\\data\\corpus\\question1_sub_bal.clean.txt', sep="\n", header=None)
 question2 = pd.read_csv('C:\\Users\\danie\\PycharmProjects\\NLP_project\\data\\corpus\\question2_sub_bal.clean.txt', sep="\n", header=None)
+quora_split = pd.read_csv('C:\\Users\\danie\\PycharmProjects\\NLP_project\\data\\quora_split_balanced_subset.txt', sep='\t', header = None)
 question1.columns = ['question']
 question2.columns = ['question']
+quora_split.columns = ['index', 'label','train_test']
+
 
 '''Load the train-test split'''
 doc_name_list = []
@@ -49,7 +54,7 @@ tokenizer = Tokenizer(num_words = MAX_NB_WORDS)
 tokenizer.fit_on_texts(list(question1['question'].values.astype(str))+list(question2['question'].values.astype(str)))
 
 
-Xtrain_q1 = tokenizer.texts_to_sequences(question1.loc[train_ids]['question'].values.astype(str))
+X_train_q1 = tokenizer.texts_to_sequences(question1.loc[train_ids]['question'].values.astype(str))
 X_train_q1 = pad_sequences(X_train_q1, maxlen=MAX_TRUNC_LEN, padding='post')
 
 X_train_q2 = tokenizer.texts_to_sequences(question2.loc[train_ids]['question'].values.astype(str))
@@ -62,6 +67,9 @@ X_test_q2 = tokenizer.texts_to_sequences(question2.loc[test_ids]['question'].val
 X_test_q2 = pad_sequences(X_test_q2, maxlen=MAX_TRUNC_LEN, padding='post')
 
 word_index =tokenizer.word_index
+
+Y_train = quora_split.loc[train_ids]['label'].values
+Y_test = quora_split.loc[test_ids]['label'].values
 
 # load pre-trained word embeddings
 word_embeddings_dim = 300
@@ -86,7 +94,7 @@ for word, i in word_index.items():
 # Model for Q1
 model_q1 = tf.keras.Sequential()
 model_q1.add(Embedding(input_dim = len(word_index)+1,
-                       output_dim = 200,
+                       output_dim = 300,
                       weights = [embedding_matrix],
                       input_length = MAX_TRUNC_LEN))
 model_q1.add(LSTM(128, activation = 'tanh', return_sequences = True))
@@ -99,9 +107,9 @@ model_q1.add(Dense(2, activation = 'sigmoid'))
 # Model for Q2
 model_q2 = tf.keras.Sequential()
 model_q2.add(Embedding(input_dim = len(word_index)+1,
-                       output_dim = 200,
+                       output_dim = 300,
                       weights = [embedding_matrix],
-                      input_length = 30))
+                      input_length = MAX_TRUNC_LEN))
 model_q2.add(LSTM(128, activation = 'tanh', return_sequences = True))
 model_q2.add(Dropout(0.2))
 model_q2.add(LSTM(128, return_sequences = True))
@@ -126,5 +134,4 @@ new_model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy',
 history = new_model.fit([X_train_q1,X_train_q2],Y_train, batch_size = 2000, epochs = 10)
 
 y_pred = new_model.predict([X_test_q1, X_test_q2], batch_size=2000, verbose=1)
-y_pred += new_model.predict([X_test_q1, X_test_q2], batch_size=2000, verbose=1)
-y_pred /= 2
+accuracy = sklearn.metrics.accuracy_score(Y_test,y_pred)
