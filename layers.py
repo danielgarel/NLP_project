@@ -58,7 +58,7 @@ def dot_(x, y, sparse=False):
 def gru_unit(support, x, var, act, mask, dropout, sparse_inputs=False):
     """GRU unit with 3D tensor inputs."""
     # message passing
-    support = tf.nn.dropout(support, dropout) # optional
+    #support = tf.nn.dropout(support, dropout) # optional
     a = tf.matmul(support, x)
 
     # update gate        
@@ -191,12 +191,12 @@ class Dense_(Layer):
         self.num_features_nonzero = placeholders['num_features_nonzero']
 
         with tf.variable_scope(self.name + '_vars'):
-            self.vars['weights1'] = glorot([input_dim, 100],
+            self.vars['weights1'] = glorot([input_dim, 50],
                                           name='weights1')
-            self.vars['weights2'] = glorot([100, output_dim],
+            self.vars['weights2'] = glorot([50, output_dim],
                                           name='weights2')
             if self.bias:
-                self.vars['bias1'] = zeros([100], name='bias1')
+                self.vars['bias1'] = zeros([50], name='bias1')
                 self.vars['bias2'] = zeros([output_dim], name='bias2')
 
         if self.logging:
@@ -206,7 +206,7 @@ class Dense_(Layer):
         x = inputs
 
         # dropout
-        x = tf.nn.dropout(x, 1-self.dropout)
+        #x = tf.nn.dropout(x, 1-self.dropout)
 
         # transform
         hidden = dot_(x, self.vars['weights1'])
@@ -368,15 +368,15 @@ class ReadoutLayer_(Layer):
         x = inputs
 
         # soft attention
-        att = tf.sigmoid(dot(x, self.vars['weights_att']) + self.vars['bias_att'])
+        #att = tf.sigmoid(dot(x, self.vars['weights_att']) + self.vars['bias_att'])
         emb = self.act(dot(x, self.vars['weights_emb']) + self.vars['bias_emb'])
 
         N = tf.reduce_sum(self.mask, axis=1)
         M = (self.mask-1) * 1e9
         
         # graph summation
-        g = self.mask * att * emb
-        g = tf.reduce_sum(g, axis=1) / N + tf.reduce_max(g + M, axis=1)
+        g = self.mask * emb#* att * emb
+        g = tf.reduce_sum(g, axis=1) / N #+ tf.reduce_max(g + M, axis=1)
         g = tf.nn.dropout(g, 1-self.dropout)      
 
         return g

@@ -9,7 +9,7 @@ from sklearn import metrics
 import pickle as pkl
 
 from utils import *
-from models import GNN, MLP, GNN_sim
+from models import GNN, MLP, GNN_sim, DNN_sim
 
 # Set random seed
 # seed = 123
@@ -33,8 +33,8 @@ flags.DEFINE_integer('early_stopping', -1, 'Tolerance for early stopping (# of e
 flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.') # Not used
 
 # Load data
-train_adj1, train_feature1, train_y1, val_adj1, val_feature1, val_y1, test_adj1, test_feature1, test_y1 = load_data('question1')
-train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2, test_feature2, test_y2 = load_data('question2')
+train_adj1, train_feature1, train_y1, val_adj1, val_feature1, val_y1, test_adj1, test_feature1, test_y1 = load_data('question1_sub_bal')
+train_adj2, train_feature2, train_y2, val_adj2, val_feature2, val_y2, test_adj2, test_feature2, test_y2 = load_data('question2_sub_bal')
 
 # concat_ratio = FLAGS.batch_size/2
 # def concat_(train_test_y, half_batch =concat_ratio, input1, input2):
@@ -156,7 +156,7 @@ for epoch in range(FLAGS.epochs):
     np.random.shuffle(indices)
     
     train_loss, train_acc = 0, 0
-    for start in range(0, len(train_y1), FLAGS.batch_size):
+    for start in range(0, 1, FLAGS.batch_size):
         end = start + FLAGS.batch_size
         idx = indices[start:end]
         # Construct feed dictionary
@@ -174,6 +174,7 @@ for epoch in range(FLAGS.epochs):
         #train_y =concat_(train_y1, concat_ratio, train_y1, train_y2)
         feed_dict = construct_feed_dict(np.concatenate((train_feature1[idx], train_feature2[idx]), axis=0), np.concatenate((train_adj1[idx], train_adj2[idx]), axis=0), np.concatenate((train_mask1[idx], train_mask2[idx]), axis=0), train_y1[idx], placeholders)
         feed_dict.update({placeholders['dropout']: FLAGS.dropout})
+        print(feed_dict)
 
         outs = sess.run([model.opt_op, model.loss, model.accuracy], feed_dict=feed_dict)
         train_loss += outs[1]*len(idx)
