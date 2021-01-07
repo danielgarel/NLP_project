@@ -13,9 +13,9 @@ random_SEED = 11
 MAX_TRUNC_LEN = 350
 
 '''Load the clean datasets'''
-question1 = pd.read_csv('C:\\Users\\danie\\PycharmProjects\\NLP_project\\data\\corpus\\question1_sub_bal.clean.txt', sep="\n", header=None)
-question2 = pd.read_csv('C:\\Users\\danie\\PycharmProjects\\NLP_project\\data\\corpus\\question2_sub_bal.clean.txt', sep="\n", header=None)
-quora_split = pd.read_csv('C:\\Users\\danie\\PycharmProjects\\NLP_project\\data\\quora_split_balanced_subset.txt', sep='\t', header = None)
+question1 = pd.read_csv('data/corpus/question1_sub_bal.clean.txt', sep="\n", header=None)
+question2 = pd.read_csv('data/corpus/question2_sub_bal.clean.txt', sep="\n", header=None)
+quora_split = pd.read_csv('data/quora_split_balanced_subset.txt', sep='\t', header = None)
 question1.columns = ['question']
 question2.columns = ['question']
 quora_split.columns = ['index', 'label','train_test']
@@ -83,7 +83,7 @@ with open('glove.6B.' + str(word_embeddings_dim) + 'd.txt', 'r') as f:
         embedding_index[word] = vectors
     f.close()
 
-embedding_matrix = np.random.random((len(word_index)+1, 200))
+embedding_matrix = np.random.random((len(word_index)+1, 300))
 for word, i in word_index.items():
     embedding_vector = embedding_index.get(word)
     if embedding_vector is not None:
@@ -135,3 +135,4 @@ history = new_model.fit([X_train_q1,X_train_q2],Y_train, batch_size = 2000, epoc
 
 y_pred = new_model.predict([X_test_q1, X_test_q2], batch_size=2000, verbose=1)
 accuracy = sklearn.metrics.accuracy_score(Y_test,y_pred)
+print(accuracy)
