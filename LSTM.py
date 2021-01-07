@@ -131,8 +131,8 @@ mergedOut = Dense(2, activation = 'sigmoid')(mergedOut)
 new_model = Model([model_q1.input, model_q2.input], mergedOut)
 new_model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy',
                  metrics = ['accuracy'])
-history = new_model.fit([X_train_q1,X_train_q2],Y_train, batch_size = 2000, epochs = 10)
+history = new_model.fit([X_train_q1,X_train_q2],Y_train, batch_size = 500, epochs = 10)
 
-y_pred = new_model.predict([X_test_q1, X_test_q2], batch_size=2000, verbose=1)
+y_pred = new_model.predict([X_test_q1, X_test_q2], batch_size=500, verbose=1)
 accuracy = sklearn.metrics.accuracy_score(Y_test,y_pred)
 print(accuracy)
