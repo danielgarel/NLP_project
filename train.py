@@ -145,7 +145,7 @@ best_cost = 0
 test_doc_embeddings = None
 preds = None
 labels = None
-
+print((train_y1 == train_y2).all())
 print('train start...')
 # Train model
 for epoch in range(FLAGS.epochs):
@@ -156,7 +156,7 @@ for epoch in range(FLAGS.epochs):
     np.random.shuffle(indices)
     
     train_loss, train_acc = 0, 0
-    for start in range(0, 1, FLAGS.batch_size):
+    for start in range(0, len(train_y1), FLAGS.batch_size):
         end = start + FLAGS.batch_size
         idx = indices[start:end]
         # Construct feed dictionary
@@ -174,9 +174,11 @@ for epoch in range(FLAGS.epochs):
         #train_y =concat_(train_y1, concat_ratio, train_y1, train_y2)
         feed_dict = construct_feed_dict(np.concatenate((train_feature1[idx], train_feature2[idx]), axis=0), np.concatenate((train_adj1[idx], train_adj2[idx]), axis=0), np.concatenate((train_mask1[idx], train_mask2[idx]), axis=0), train_y1[idx], placeholders)
         feed_dict.update({placeholders['dropout']: FLAGS.dropout})
-        print(feed_dict)
+        #print(feed_dict)
 
-        outs = sess.run([model.opt_op, model.loss, model.accuracy], feed_dict=feed_dict)
+        outs = sess.run([model.opt_op, model.loss, model.accuracy, model.embeddings, model.classification_features], feed_dict=feed_dict)
+        #print(outs[3])
+        #print(outs[4])
         train_loss += outs[1]*len(idx)
         train_acc += outs[2]*len(idx)
     train_loss /= len(train_y1)

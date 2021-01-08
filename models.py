@@ -197,6 +197,7 @@ class GNN_sim(Model):
         self.mask = placeholders['mask']
         self.placeholders = placeholders
         self.classifier = None
+        self.classification_features = None
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
         print(self.output_dim)
@@ -241,10 +242,10 @@ class GNN_sim(Model):
         #dot = tf.reduce_sum( mul, 1, keep_dims=True )
         #l2 = tf.reduce_sum(tf.multiply( sub, sub ), 1, keep_dims=True)
 
-        classification_features = tf.concat([sub, mul], 1)
-        print(classification_features)
+        self.classification_features = tf.concat([sub, mul], 1)
+        print(self.classification_features)
 
-        self.outputs = self.classifier(classification_features)
+        self.outputs = self.classifier(self.classification_features)
 
         # Store model variables for easy access
         variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
@@ -297,6 +298,7 @@ class DNN_sim(Model):
         self.mask = placeholders['mask']
         self.placeholders = placeholders
         self.classifier = None
+        self.classification_features = None
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
         print(self.output_dim)
@@ -341,9 +343,9 @@ class DNN_sim(Model):
         #dot = tf.reduce_sum( mul, 1, keep_dims=True )
         #l2 = tf.reduce_sum(tf.multiply( sub, sub ), 1, keep_dims=True)
 
-        classification_features = tf.concat([sub, mul], 1)
+        self.classification_features = tf.concat([sub, mul], 1)
 
-        self.outputs = self.classifier(classification_features)
+        self.outputs = self.classifier(self.classification_features)
 
         # Store model variables for easy access
         variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
@@ -376,6 +378,7 @@ class DNN_sim(Model):
                                  output_dim=self.output_dim,
                                  placeholders=self.placeholders,
                                  act=None,
+                                 bias=True,
                                  dropout=False,
                                  sparse_inputs=False,
                                  logging=self.logging)
