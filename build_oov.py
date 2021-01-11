@@ -37,7 +37,7 @@ vocab_size = len(vocab)
 
 oov = {}
 for v in vocab:
-    oov[v] = np.random.uniform(-0.01, 0.01, word_embeddings_dim)
+    oov[v] = np.random.uniform(-0.01, 0.01, 300)
 
 with open("data/oov_dic", 'wb') as f:
     pkl.dump(oov, f)

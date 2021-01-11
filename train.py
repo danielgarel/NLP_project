@@ -57,6 +57,7 @@ train_adj1, train_mask1 = preprocess_adj(train_adj1, m)
 train_adj2, train_mask2 = preprocess_adj(train_adj2, m)
 
 m = max([len(f) for f in train_feature1] + [len(f) for f in train_feature2])
+print(m)
 train_feature1 = preprocess_features(train_feature1, m)
 train_feature2 = preprocess_features(train_feature2, m)
 print(train_adj1.shape)

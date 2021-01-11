@@ -237,7 +237,7 @@ class GNN_sim(Model):
         questions1, questions2 = tf.split(self.embeddings, num_or_size_splits=2, axis=0)
 
         # Create feature for classification
-        sub = tf.math.subtract(questions1, questions2)
+        sub = tf.math.abs(tf.math.subtract(questions1, questions2))
         mul = tf.math.multiply(questions1, questions2)
         #dot = tf.reduce_sum( mul, 1, keep_dims=True )
         #l2 = tf.reduce_sum(tf.multiply( sub, sub ), 1, keep_dims=True)

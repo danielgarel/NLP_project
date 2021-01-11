@@ -121,6 +121,12 @@ def preprocess_features(features, m):
     
     for i in tqdm(range(features.shape[0])):
         feature = np.array(features[i])
+        if len(feature) == 0:
+            print(feature.shape)
+            print(i)
+            feature = np.array([[0.001]*300])
+            print(feature.shape)
+        
         pad = max_length - feature.shape[0] # padding for each epoch
         feature = np.pad(feature, ((0,pad),(0,0)), mode='constant')
         features[i] = feature

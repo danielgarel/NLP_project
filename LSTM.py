@@ -1,8 +1,10 @@
 import tensorflow as tf
 import random
 import sklearn
+from sklearn import metrics
 import tensorflow.keras
 from sklearn.metrics import accuracy_score
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, LearningRateScheduler, ReduceLROnPlateau
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import *
 from tensorflow.keras.models import Model
@@ -12,7 +14,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
 random_SEED = 11
-MAX_TRUNC_LEN = 350
+MAX_TRUNC_LEN = 30
 
 '''Load the clean datasets'''
 question1 = pd.read_csv('data/corpus/question1_sub_bal.clean.txt', sep="\n", header=None)
@@ -102,10 +104,10 @@ model_q1.add(Embedding(input_dim = len(word_index)+1,
                       input_length = MAX_TRUNC_LEN))
 model_q1.add(LSTM(128, activation = 'tanh', return_sequences = True))
 model_q1.add(Dropout(0.2))
-#model_q1.add(LSTM(128, return_sequences = True))
-#model_q1.add(LSTM(128))
-model_q1.add(Dense(60, activation = 'tanh'))
-model_q1.add(Dense(5, activation = 'sigmoid'))
+model_q1.add(LSTM(128, return_sequences = True))
+model_q1.add(LSTM(128))
+model_q1.add(Dense(80, activation = 'tanh'))
+model_q1.add(Dense(30, activation = 'sigmoid'))
 
 # Model for Q2
 model_q2 = tf.keras.Sequential()
@@ -115,29 +117,39 @@ model_q2.add(Embedding(input_dim = len(word_index)+1,
                       input_length = MAX_TRUNC_LEN))
 model_q2.add(LSTM(128, activation = 'tanh', return_sequences = True))
 model_q2.add(Dropout(0.2))
-#model_q2.add(LSTM(128, return_sequences = True))
-#model_q2.add(LSTM(128))
-model_q2.add(Dense(60, activation = 'tanh'))
-model_q2.add(Dense(5, activation = 'sigmoid'))
+model_q2.add(LSTM(128, return_sequences = True))
+model_q2.add(LSTM(128))
+model_q2.add(Dense(80, activation = 'tanh'))
+model_q2.add(Dense(30, activation = 'sigmoid'))
 
 # Merging the output of the two models,i.e, model_q1 and model_q2
 
 mergedOut = Multiply()([model_q1.output, model_q2.output])
 
 mergedOut = Flatten()(mergedOut)
-#mergedOut = Dense(100, activation = 'relu')(mergedOut)
-#mergedOut = Dropout(0.2)(mergedOut)
+mergedOut = Dense(100, activation = 'relu')(mergedOut)
+mergedOut = Dropout(0.2)(mergedOut)
 mergedOut = Dense(50, activation = 'relu')(mergedOut)
 mergedOut = Dropout(0.2)(mergedOut)
-mergedOut = Dense(2, activation = 'sigmoid')(mergedOut)
+mergedOut = Dense(2, activation = 'softmax')(mergedOut)
+
+file_path = "save.h5"
+checkpoint = ModelCheckpoint(file_path, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+early = EarlyStopping(monitor="val_accuracy", mode="max", patience=5, verbose=1)
+redonplat = ReduceLROnPlateau(monitor="val_accuracy", mode="max", patience=3, verbose=2)
+callbacks_list = [checkpoint, early, redonplat]
 
 new_model = Model([model_q1.input, model_q2.input], mergedOut)
-opt = tensorflow.keras.optimizers.Adam(learning_rate=0.0005)
+opt = tensorflow.keras.optimizers.Adam(learning_rate=0.001)
 new_model.compile(optimizer = opt, loss = 'sparse_categorical_crossentropy',
                  metrics = ['accuracy'], )
-history = new_model.fit([X_train_q1,X_train_q2],Y_train, batch_size = 500, epochs = 10, validation_split = 0.1)
+history = new_model.fit([X_train_q1,X_train_q2],Y_train, callbacks=callbacks_list, batch_size = 500, epochs = 15, validation_split = 0.1)
+new_model.load_weights(file_path)
 
 y_pred = new_model.predict([X_test_q1, X_test_q2], batch_size=500, verbose=1)[:, 0]
-y_pred = (y_pred>0.5).astype(np.int8)
+y_pred = (y_pred<0.5).astype(np.int8)
 accuracy = accuracy_score(Y_test,y_pred)
 print(accuracy)
+
+print("Test Precision, Recall and F1-Score...")
+print(metrics.classification_report(Y_test, y_pred, digits=4))

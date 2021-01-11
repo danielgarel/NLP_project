@@ -375,8 +375,8 @@ class ReadoutLayer_(Layer):
         M = (self.mask-1) * 1e9
         
         # graph summation
-        g = self.mask * emb#* att * emb
-        g = tf.reduce_sum(g, axis=1) / N #+ tf.reduce_max(g + M, axis=1)
+        g = self.mask * emb #* att * emb
+        g = tf.reduce_sum(g, axis=1) / N# + tf.reduce_max(g + M, axis=1)
         #g = tf.nn.dropout(g, 1-self.dropout)      
 
         return g

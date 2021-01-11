@@ -85,13 +85,13 @@ train_ids = []
 for train_name in doc_train_list:
     train_id = doc_name_list.index(train_name)
     train_ids.append(train_id)
-random.Random(random_SEED).shuffle(train_ids)
+#random.Random(random_SEED).shuffle(train_ids)
 
 test_ids = []
 for test_name in doc_test_list:
     test_id = doc_name_list.index(test_name)
     test_ids.append(test_id)
-random.Random(random_SEED).shuffle(test_ids)
+#random.Random(random_SEED).shuffle(test_ids)
 
 ids = train_ids + test_ids
 print(len(ids))
@@ -120,9 +120,10 @@ for i in range(vocab_size):
 
 # initialize out-of-vocabulary word embeddings
 oov = {}
-for v in vocab:
-    oov[v] = np.random.uniform(-0.01, 0.01, word_embeddings_dim)
-
+#for v in vocab:
+#    oov[v] = np.random.uniform(-0.01, 0.01, word_embeddings_dim)
+with open("data/oov_dic", 'rb') as f:
+    oov = pkl.load(f)
 
 # build label list
 label_set = set()
@@ -148,6 +149,8 @@ def build_graph(start, end):
     vocab_set = set()
 
     for i in tqdm(range(start, end)):
+        if i == 5211 or i == 62940:
+            continue
         doc_words = shuffle_doc_words_list[i].split()
         if truncate:
             doc_words = doc_words[:MAX_TRUNC_LEN]
@@ -212,11 +215,19 @@ def build_graph(start, end):
         for k, v in sorted(doc_word_id_map.items(), key=lambda x: x[1]):
             features.append(word_embeddings[k] if k in word_embeddings else oov[k])
 
+        if len(features) == 0:
+            print(i)
+            print(doc_words)
+            print(shuffle_doc_words_list[i])
+            print(doc_content_list[ids[i]])
+            print(ids[i])
         x_adj.append(adj)
         x_feature.append(features)
 
     # one-hot labels
     for i in range(start, end):
+        if i == 5211 or i == 62940:
+            continue
         doc_meta = shuffle_doc_name_list[i]
         temp = doc_meta.split('\t')
         label = temp[1]
@@ -225,6 +236,9 @@ def build_graph(start, end):
         one_hot[label_index] = 1
         y.append(one_hot)
     y = np.array(y)
+    print(len(x_adj))
+    print(len(x_feature))
+    print(len(y))
     
     return x_adj, x_feature, y, doc_len_list, vocab_set
 
