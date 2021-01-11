@@ -124,13 +124,15 @@ model_q2.add(Dense(30, activation = 'sigmoid'))
 
 # Merging the output of the two models,i.e, model_q1 and model_q2
 
-mergedOut = Multiply()([model_q1.output, model_q2.output])
+mul = Multiply()([model_q1.output, model_q2.output])
+sub = tensorflow.keras.backend.abs(Subtract()([model_q1.output, model_q2.output]))
+mergedOut = Concatenate(axis=1)([sub, mult])
 
 mergedOut = Flatten()(mergedOut)
-mergedOut = Dense(100, activation = 'relu')(mergedOut)
-mergedOut = Dropout(0.2)(mergedOut)
-mergedOut = Dense(50, activation = 'relu')(mergedOut)
-mergedOut = Dropout(0.2)(mergedOut)
+#mergedOut = Dense(100, activation = 'relu')(mergedOut)
+#mergedOut = Dropout(0.2)(mergedOut)
+mergedOut = Dense(50, activation = 'tanh')(mergedOut)
+#mergedOut = Dropout(0.2)(mergedOut)
 mergedOut = Dense(2, activation = 'softmax')(mergedOut)
 
 file_path = "save.h5"
