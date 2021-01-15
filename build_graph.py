@@ -166,8 +166,6 @@ def build_graph(start, end):
         for j in range(doc_nodes):
             doc_word_id_map[doc_vocab[j]] = j
 
-        #TODO: Change the sliding window here below
-        # sliding windows
         windows = []
         if doc_len <= window_size:
             windows.append(doc_words)
